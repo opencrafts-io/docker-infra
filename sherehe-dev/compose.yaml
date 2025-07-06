@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16
+    container_name: sherehe_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sherehe_user
+      POSTGRES_PASSWORD: sherehe_pass
+      POSTGRES_DB: sherehe
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    image: opencrafts/sherehe-backend-staging:dev
+    container_name: sherehe_app
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DB_USER: sherehe_user
+      DB_PASSWORD: sherehe_pass
+      DB_NAME: sherehe
+      DB_HOST: db
+      DB_PORT: 5432
+      PGUSER: sherehe_user
+      PGPASSWORD: sherehe_pass
+      PGDATABASE: sherehe
+      PGHOST: db
+      PGPORT: 5432
+    entrypoint: ["/bin/sh", "-c", "npx node-pg-migrate up && npm run dev"]
+
+volumes:
+  db_data:
