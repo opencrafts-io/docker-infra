@@ -5,9 +5,9 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-        POSTGRES_USER: ${DB_USER}
-        POSTGRES_PASSWORD: ${DB_PASSWORD}
-        POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5449:5432"
     volumes:
@@ -17,17 +17,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - verinet
   app:
     image: opencrafts/verisafe-backend-staging:dev
-    container_name: verisafe
+    container_name: verisafe-container
     restart: always
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "3003:8080"
+      - "8080:8080"
     env_file: .env
     volumes:
       - .env:/workspace/.env
+    networks:
+      - verinet
+      - rabbitmq-shared
 volumes:
   db_data:
+networks:
+  verinet:
+  rabbitmq-shared:
+    external: true

@@ -1,25 +1,23 @@
 services:
   db:
     image: postgres:16
-    container_name: notifications_db
+    container_name: keep-up_db
     restart: unless-stopped
     env_file:
       - .env
     ports:
       - "${DB_PORT_HOST}:5432"
     volumes:
-      - monger_db_data:/var/lib/postgresql/data
+      - keepup_db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - mongernet
 
   app:
-    image: opencrafts/notifications-backend-staging:dev
-    container_name: notifications_app
+    image: opencrafts/keep-up-staging:dev
+    container_name: keep-up_app
     restart: always
     depends_on:
       db:
@@ -27,16 +25,9 @@ services:
     env_file:
       - .env
     ports:
-      - "${APP_PORT_HOST}:6969"
+      - "${APP_PORT_HOST}:8000"
     volumes:
       - .env:/workspace/.env
-    networks:
-      - mongernet
-      - rabbitmq-shared
 
 volumes:
-  monger_db_data:
-networks:
-  mongernet:
-  rabbitmq-shared:
-    external: true
+  db_data:
